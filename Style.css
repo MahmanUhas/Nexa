@@ -9,3 +9,28 @@ body, html {
 canvas {
   display: block;
 }
+
+/* Learning points display */
+#pointsDisplay {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  color: yellow;
+  font-size: 18px;
+  z-index: 100;
+}
+
+/* Lesson messages for hints/solution */
+#lessonMessage {
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0,0,0,0.7);
+  color: white;
+  padding: 10px;
+  border-radius: 5px;
+  font-size: 16px;
+  z-index: 100;
+  display: none;
+}
