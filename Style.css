@@ -20,7 +20,7 @@ canvas {
   z-index: 100;
 }
 
-/* Lesson messages for hints/solution */
+/* Lesson messages */
 #lessonMessage {
   position: absolute;
   top: 20px;
