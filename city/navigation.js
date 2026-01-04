@@ -1,56 +1,19 @@
-import { PointerLockControls } from 'https://cdn.jsdelivr.net/npm/three@0.152.2/examples/jsm/controls/PointerLockControls.js';
+export const districts = [
+  { name: "North District", xRange: [-50, -10], zRange: [-50, -10] },
+  { name: "East District", xRange: [10, 50], zRange: [-50, -10] },
+  { name: "South District", xRange: [-50, -10], zRange: [10, 50] },
+  { name: "West District", xRange: [10, 50], zRange: [10, 50] },
+  { name: "Central District", xRange: [-10, 10], zRange: [-10, 10] }
+];
 
-let controls;
-
-export function initNavigation(camera, domElement) {
-  controls = new PointerLockControls(camera, domElement);
-  domElement.addEventListener('click', () => {
-    controls.lock();
-  });
-
-  const velocity = new THREE.Vector3();
-  const direction = new THREE.Vector3();
-  const moveForward = false;
-  const moveBackward = false;
-  const moveLeft = false;
-  const moveRight = false;
-
-  const onKeyDown = function(event) {
-    switch(event.code) {
-      case 'ArrowUp':
-      case 'KeyW': moveForward = true; break;
-      case 'ArrowLeft':
-      case 'KeyA': moveLeft = true; break;
-      case 'ArrowDown':
-      case 'KeyS': moveBackward = true; break;
-      case 'ArrowRight':
-      case 'KeyD': moveRight = true; break;
+export function assignDistrict(house) {
+  for (let district of districts) {
+    if (
+      house.position.x >= district.xRange[0] && house.position.x <= district.xRange[1] &&
+      house.position.z >= district.zRange[0] && house.position.z <= district.zRange[1]
+    ) {
+      house.userData.district = district.name;
+      break;
     }
-  };
-
-  const onKeyUp = function(event) {
-    switch(event.code) {
-      case 'ArrowUp':
-      case 'KeyW': moveForward = false; break;
-      case 'ArrowLeft':
-      case 'KeyA': moveLeft = false; break;
-      case 'ArrowDown':
-      case 'KeyS': moveBackward = false; break;
-      case 'ArrowRight':
-      case 'KeyD': moveRight = false; break;
-    }
-  };
-
-  document.addEventListener('keydown', onKeyDown);
-  document.addEventListener('keyup', onKeyUp);
-
-  function move() {
-    requestAnimationFrame(move);
-    direction.z = Number(moveForward) - Number(moveBackward);
-    direction.x = Number(moveRight) - Number(moveLeft);
-    direction.normalize();
-    controls.moveRight(direction.x * 0.1);
-    controls.moveForward(direction.z * 0.1);
   }
-  move();
 }
