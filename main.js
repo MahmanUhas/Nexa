@@ -1,63 +1,93 @@
 import { initCity } from './city/cityLayout.js';
 import { spawnHouses } from './city/houses.js';
+import { assignDistrict } from './city/districts.js';
 import { initNavigation } from './city/navigation.js';
 
-import { initMentors } from './mentors/WALLIX.js';
-import { initMentors as initBAY } from './mentors/BAYLEX.js';
-import { initMentors as initOPT } from './mentors/OPTIBUILD.js';
-import { initMentors as initPIX } from './mentors/PIXELINA.js';
-import { initMentors as initBRU } from './mentors/BRUSHA.js';
-import { initMentors as initFAB } from './mentors/FABRIX.js';
+import { initMentors as WALLIX } from './mentors/WALLIX.js';
+import { initMentors as BAYLEX } from './mentors/BAYLEX.js';
+import { initMentors as OPTIBUILD } from './mentors/OPTIBUILD.js';
+import { initMentors as PIXELINA } from './mentors/PIXELINA.js';
+import { initMentors as BRUSHA } from './mentors/BRUSHA.js';
+import { initMentors as FABRIX } from './mentors/FABRIX.js';
 
-import { initLabs } from './labs/coding.js';
-import { initLabs as roboticsLab } from './labs/robotics.js';
-import { initLabs as civilLab } from './labs/civil.js';
-import { initLabs as graphicLab } from './labs/graphic.js';
-import { initLabs as drawingLab } from './labs/drawing.js';
-import { initLabs as fashionLab } from './labs/fashion.js';
+import { initLabs as CodingLab } from './labs/coding.js';
+import { initLabs as RoboticsLab } from './labs/robotics.js';
+import { initLabs as CivilLab } from './labs/civil.js';
+import { initLabs as GraphicLab } from './labs/graphic.js';
+import { initLabs as DrawingLab } from './labs/drawing.js';
+import { initLabs as FashionLab } from './labs/fashion.js';
 
-let scene, camera, renderer;
+import { checkInteraction } from './engine/interactionEngine.js';
 
-function init() {
-  scene = new THREE.Scene();
-  camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
-  renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('nexaCanvas'), antialias: true });
-  renderer.setSize(window.innerWidth, window.innerHeight);
+/* ---------- SCENE SETUP ---------- */
+const canvas = document.getElementById('nexaCanvas');
 
-  initCity(scene);
-  const houses = spawnHouses(scene);
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x0b0f1a);
 
-  // Mentors
-  initMentors(scene);
-  initBAY(scene);
-  initOPT(scene);
-  initPIX(scene);
-  initBRU(scene);
-  initFAB(scene);
+const camera = new THREE.PerspectiveCamera(
+  60,
+  window.innerWidth / window.innerHeight,
+  0.1,
+  1000
+);
+camera.position.set(8, 8, 12);
 
-  // Labs
-  initLabs(scene, houses[0]);
-  roboticsLab(scene, houses[0]);
-  civilLab(scene, houses[0]);
-  graphicLab(scene, houses[0]);
-  drawingLab(scene, houses[0]);
-  fashionLab(scene, houses[0]);
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setPixelRatio(window.devicePixelRatio);
 
-  initNavigation(camera, renderer.domElement);
+/* ---------- CITY ---------- */
+initCity(scene);
 
-  camera.position.set(0, 2, 5);
-  animate();
-}
+/* ---------- NAVIGATION ---------- */
+const controls = initNavigation(camera, renderer.domElement);
 
-function animate() {
-  requestAnimationFrame(animate);
-  renderer.render(scene, camera);
-}
+/* ---------- HOUSES ---------- */
+const houses = spawnHouses(scene);
+houses.forEach(assignDistrict);
 
+/* ---------- LABS (attach to first house for now) ---------- */
+const mainHouse = houses[0];
+CodingLab(scene, mainHouse);
+RoboticsLab(scene, mainHouse);
+CivilLab(scene, mainHouse);
+GraphicLab(scene, mainHouse);
+DrawingLab(scene, mainHouse);
+FashionLab(scene, mainHouse);
+
+/* ---------- MENTORS ---------- */
+WALLIX(scene);
+BAYLEX(scene);
+OPTIBUILD(scene);
+PIXELINA(scene);
+BRUSHA(scene);
+FABRIX(scene);
+
+/* ---------- PLAYER (camera proxy) ---------- */
+const player = camera;
+
+/* ---------- INTERACTION (click) ---------- */
+window.addEventListener('click', () => {
+  scene.traverse(obj => {
+    if (obj.interact) {
+      checkInteraction(player, obj);
+    }
+  });
+});
+
+/* ---------- RESIZE ---------- */
 window.addEventListener('resize', () => {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
 });
 
-init();
+/* ---------- RENDER LOOP ---------- */
+function animate() {
+  requestAnimationFrame(animate);
+  controls.update();
+  renderer.render(scene, camera);
+}
+
+animate();
